@@ -6,8 +6,10 @@ using System.Reflection;
 using SuchByte.MacroDeck.Variables;
 using System.Xml.Linq;
 using SuchByte.MacroDeck.Logging;
-using RestSharp;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Threading.Tasks;
+using System.Threading;
+using System.Net.Http;
 
 namespace airxiti.Euroscope
 {
@@ -33,24 +35,44 @@ namespace airxiti.Euroscope
             return DateTime.Now.ToString("HH:mm:ss");
         }
 
-        public override async void Enable()
-        {
-            System.Threading.Timer timer = null;
-            timer = new System.Threading.Timer(_ =>
-            {
-                SetVariable(new VariableState { Name = "time_sec", Value = GetTimeInSeconds(), Type = VariableType.String, Save = false });
-            }, null, 0, 1000);
+        private CancellationTokenSource _cts;
 
-            var options = new RestClientOptions("")
+        private async Task UpdateLoopAsync(CancellationToken token)
+        {
+            string lastMinute = null;
+            while (!token.IsCancellationRequested)
             {
-                MaxTimeout = -1,
-            };
-            var client = new RestClient(options);
-            var request = new RestRequest("https://metar.vatsim.net/:EDDB", Method.Get);
-            request.AddHeader("Accept", "text/plain");
-            RestResponse response = await client.ExecuteAsync(request);
-            var metar_eddb = response.Content;
-            SetVariable(new VariableState { Name = "metar_eddb", Value = metar_eddb, Type = VariableType.String, Save = true });
+                // Jede Sekunde: Zeitvariable aktualisieren
+                SetVariable(new VariableState { Name = "time_sec", Value = GetTimeInSeconds(), Type = VariableType.String, Save = false });
+
+                // Jede Minute: METAR abrufen und speichern
+                string currentMinute = DateTime.Now.ToString("yyyyMMddHHmm");
+                if (currentMinute != lastMinute)
+                {
+                    lastMinute = currentMinute;
+                    var metar_eddb = await EDDB_metar();
+                    SetVariable(new VariableState { Name = "metar_eddb", Value = metar_eddb, Type = VariableType.String, Save = true });
+                }
+
+                await Task.Delay(1000, token);
+            }
+        }
+
+        public override void Enable()
+        {
+            _cts = new CancellationTokenSource();
+            _ = UpdateLoopAsync(_cts.Token);
+        }
+
+        static async Task<string> EDDB_metar()
+        {
+            var client = new HttpClient();
+            var request = new HttpRequestMessage(HttpMethod.Get, "https://metar.vatsim.net/EDDB");
+            request.Headers.Add("Accept", "text/plain");
+            var response = await client.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadAsStringAsync();
+
         }
     }
 
