@@ -50,8 +50,12 @@ namespace airxiti.Euroscope
                 if (currentMinute != lastMinute)
                 {
                     lastMinute = currentMinute;
-                    var metar_eddb = await EDDB_metar();
+                    var metar_eddb = await fetch_metar("EDDB");
                     SetVariable(new VariableState { Name = "metar_eddb", Value = metar_eddb, Type = VariableType.String, Save = true });
+                    var metar_edah = await fetch_metar("EDAH");
+                    SetVariable(new VariableState { Name = "metar_edah", Value = metar_edah, Type = VariableType.String, Save = true });
+                    var metar_etnl = await fetch_metar("ETNL");
+                    SetVariable(new VariableState { Name = "metar_etnl", Value = metar_etnl, Type = VariableType.String, Save = true });
                 }
 
                 await Task.Delay(1000, token);
@@ -64,15 +68,15 @@ namespace airxiti.Euroscope
             _ = UpdateLoopAsync(_cts.Token);
         }
 
-        static async Task<string> EDDB_metar()
+        static async Task<string> fetch_metar(string icao)
         {
             var client = new HttpClient();
-            var request = new HttpRequestMessage(HttpMethod.Get, "https://metar.vatsim.net/EDDB");
+            var url = $"https://metar.vatsim.net/{icao}";
+            var request = new HttpRequestMessage(HttpMethod.Get, url);
             request.Headers.Add("Accept", "text/plain");
             var response = await client.SendAsync(request);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadAsStringAsync();
-
         }
     }
 
