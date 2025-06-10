@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="RestSharp" Version="112.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="Macro Deck 2">
       <HintPath>..\..\..\..\AppData\Local\Programs\Macro Deck\Macro Deck 2.dll</HintPath>
     </Reference>

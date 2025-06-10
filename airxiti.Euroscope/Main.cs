@@ -6,6 +6,7 @@ using System.Reflection;
 using SuchByte.MacroDeck.Variables;
 using System.Xml.Linq;
 using SuchByte.MacroDeck.Logging;
+using RestSharp;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace airxiti.Euroscope
@@ -32,14 +33,24 @@ namespace airxiti.Euroscope
             return DateTime.Now.ToString("HH:mm:ss");
         }
 
-        public override void Enable()
+        public override async void Enable()
         {
-            while (true)
+            System.Threading.Timer timer = null;
+            timer = new System.Threading.Timer(_ =>
             {
                 SetVariable(new VariableState { Name = "time_sec", Value = GetTimeInSeconds(), Type = VariableType.String, Save = false });
-                System.Threading.Thread.Sleep(1000);
-            }
-            
+            }, null, 0, 1000);
+
+            var options = new RestClientOptions("")
+            {
+                MaxTimeout = -1,
+            };
+            var client = new RestClient(options);
+            var request = new RestRequest("https://metar.vatsim.net/:EDDB", Method.Get);
+            request.AddHeader("Accept", "text/plain");
+            RestResponse response = await client.ExecuteAsync(request);
+            var metar_eddb = response.Content;
+            SetVariable(new VariableState { Name = "metar_eddb", Value = metar_eddb, Type = VariableType.String, Save = true });
         }
     }
 
