@@ -1,0 +1,11 @@
+{
+    "type": "Plugin",
+    "name": "Euroscope Plugin",
+    "author": "airxiti",
+    "repository": "https://github.com/airxiti2/airxiti.macro-deck-utils",
+    "packageId": "airxiti.Euroscope",
+    "version": "1.0.1",
+    "target-plugin-api-version": 40,
+    "target-macro-deck-version": "2.15.0",
+    "dll": "airxiti.Euroscope.dll"
+}

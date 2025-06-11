@@ -10,11 +10,26 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Net.Http;
+using System.Collections;
+using SuchByte.MacroDeck.ActionButton;
+using SuchByte.MacroDeck.GUI.CustomControls;
+using SuchByte.MacroDeck.GUI;
+#pragma warning disable CA1416
 
 namespace airxiti.Euroscope
 {
     public class Main : MacroDeckPlugin
     {
+        public static Main Instance { get; private set; }
+
+        public Main()
+        {
+            Instance = this;
+        }
+        public override bool CanConfigure => true;
+
+
+
         public class VariableState
         {
             public string Name { get; set; }
@@ -26,6 +41,8 @@ namespace airxiti.Euroscope
             public bool Save { get { return _save; } set { _save = value; } }
         }
 
+        private Stats stats;
+        private Metarfetcher metar;
         public void SetVariable(VariableState variableState)
         {
             VariableManager.SetValue(string.Format("Euroscope_{0}", variableState.Name), variableState.Value, variableState.Type, this, variableState.Save);
@@ -39,45 +56,93 @@ namespace airxiti.Euroscope
 
         private async Task UpdateLoopAsync(CancellationToken token)
         {
-            string lastMinute = null;
-            while (!token.IsCancellationRequested)
+            try
             {
-                // Jede Sekunde: Zeitvariable aktualisieren
-                SetVariable(new VariableState { Name = "time_sec", Value = GetTimeInSeconds(), Type = VariableType.String, Save = false });
-
-                // Jede Minute: METAR abrufen und speichern
-                string currentMinute = DateTime.Now.ToString("yyyyMMddHHmm");
-                if (currentMinute != lastMinute)
+                string lastMinute = null;
+                await stats.GetVatsimStatusAsync();
+                SetVariable(new VariableState { Name = "station", Value = $"{stats.callsign}", Type = VariableType.String, Save = true });
+                while (!token.IsCancellationRequested)
                 {
-                    lastMinute = currentMinute;
-                    var metar_eddb = await fetch_metar("EDDB");
-                    SetVariable(new VariableState { Name = "metar_eddb", Value = metar_eddb, Type = VariableType.String, Save = true });
-                    var metar_edah = await fetch_metar("EDAH");
-                    SetVariable(new VariableState { Name = "metar_edah", Value = metar_edah, Type = VariableType.String, Save = true });
-                    var metar_etnl = await fetch_metar("ETNL");
-                    SetVariable(new VariableState { Name = "metar_etnl", Value = metar_etnl, Type = VariableType.String, Save = true });
-                }
+                    SetVariable(new VariableState { Name = "time_sec", Value = GetTimeInSeconds(), Type = VariableType.String, Save = false });
 
-                await Task.Delay(1000, token);
+                    string currentMinute = DateTime.Now.ToString("yyyyMMddHHmm");
+                    if (currentMinute != lastMinute)
+                    {
+                        lastMinute = currentMinute;
+                        await stats.GetVatsimStatusAsync();
+                        
+                        try
+                        {
+                            foreach (var airport in Configurator.Instance.Airports)
+                            {
+                                var metarData = await Metarfetcher.fetch_metar(airport);
+                                SetVariable(new VariableState { Name = $"metar_{airport.ToLower()}", Value = metarData, Type = VariableType.String, Save = true });
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            MacroDeckLogger.Error(this, $"Error fetching METAR data: {ex.Message}");
+                        }
+                        try { SetVariable(new VariableState { Name = "elapsed", Value = $"{stats.elapsed:hh\\:mm}", Type = VariableType.String, Save = true }); }
+                        catch (Exception ex)
+                        {
+                            MacroDeckLogger.Error(this, $"Error setting elapsed time variable: {ex.Message}");
+                        }
+                    }
+                    await Task.Delay(1000, token);
+                }
+            }
+            catch (Exception ex)
+            {
+                MacroDeckLogger.Info(this, $"UpdateLoopAsync Exception: {ex}");     
             }
         }
 
+
         public override void Enable()
         {
+
+            this.Actions = new List<PluginAction>
+            {
+                new ResetPlugin()
+            };
+
+            if (_cts != null)
+            {
+                _cts.Cancel();
+                try
+                {
+                    Task.Delay(200).Wait();
+                }
+                catch { }
+                _cts.Dispose();
+                _cts = null;
+            }
+
+            stats = new Stats();
+            
+            
             _cts = new CancellationTokenSource();
             _ = UpdateLoopAsync(_cts.Token);
         }
 
-        static async Task<string> fetch_metar(string icao)
+        public override void OpenConfigurator()
         {
-            var client = new HttpClient();
-            var url = $"https://metar.vatsim.net/{icao}";
-            var request = new HttpRequestMessage(HttpMethod.Get, url);
-            request.Headers.Add("Accept", "text/plain");
-            var response = await client.SendAsync(request);
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadAsStringAsync();
+            using (var configuratorForm = new EuroscopeConfiguratorForm())
+            {
+                configuratorForm.ShowDialog();
+            }
+        }
+
+        public class ResetPlugin : PluginAction
+        {
+            public override string Name => "Reset";
+            public override string Description => "Reset Plugin";
+            public override void Trigger(string clientId, ActionButton actionButton)
+            {
+                MacroDeckLogger.Info(Instance, "Resetting Euroscope Plugin");
+                Instance?.Enable();
+            }
         }
     }
-
 }
