@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using SuchByte.MacroDeck.Plugins;
 
-namespace airxiti.Euroscope
+namespace airxiti.Vatsim
 {
     public class ConfigData
     {
@@ -21,7 +21,7 @@ namespace airxiti.Euroscope
     {
         private static readonly string ConfigPath = Path.Combine(
     Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-    "Macro Deck", "configs", "EuroscopeConfig.json");
+    "Macro Deck", "configs", "airxiti_vatsim plugin.json");
 
         private static Configurator _instance;
         public static Configurator Instance => _instance ??= new Configurator();
@@ -62,7 +62,7 @@ namespace airxiti.Euroscope
         }
     }
 
-    public class EuroscopeConfiguratorForm : Form
+    public class VatsimConfiguratorForm : Form
     {
         private TextBox txtAirports;
         private Button btnSave;
@@ -71,7 +71,7 @@ namespace airxiti.Euroscope
         private TextBox txtVatsimId;
         private Label lblVatsimId;
         private Button btnDeleteAirport;
-        public EuroscopeConfiguratorForm()
+        public VatsimConfiguratorForm()
         {
             InitializeComponent();
         }
@@ -83,7 +83,7 @@ namespace airxiti.Euroscope
             this.BackColor = darkBack;
             this.ForeColor = whiteFore;
 
-            this.Text = "Euroscope Configurator";
+            this.Text = "Vatsim Plugin Configurator";
             this.Size = new System.Drawing.Size(400, 400);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -183,7 +183,7 @@ namespace airxiti.Euroscope
                 // Variable entfernen (wenn MacroDeck läuft)
                 try
                 {
-                    SuchByte.MacroDeck.Variables.VariableManager.DeleteVariable($"Euroscope_{selectedAirport.ToLower()}");
+                    SuchByte.MacroDeck.Variables.VariableManager.DeleteVariable($"vatsim_{selectedAirport.ToLower()}");
                 }
                 catch (Exception ex)
                 {

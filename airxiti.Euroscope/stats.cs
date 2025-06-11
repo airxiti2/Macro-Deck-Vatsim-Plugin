@@ -4,7 +4,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using SuchByte.MacroDeck.Logging;
 
-namespace airxiti.Euroscope
+namespace airxiti.Vatsim
 {
     internal class Stats
     {

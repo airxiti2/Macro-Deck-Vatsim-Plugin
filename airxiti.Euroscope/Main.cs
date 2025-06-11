@@ -16,7 +16,7 @@ using SuchByte.MacroDeck.GUI.CustomControls;
 using SuchByte.MacroDeck.GUI;
 #pragma warning disable CA1416
 
-namespace airxiti.Euroscope
+namespace airxiti.Vatsim
 {
     public class Main : MacroDeckPlugin
     {
@@ -45,7 +45,7 @@ namespace airxiti.Euroscope
         private Metarfetcher metar;
         public void SetVariable(VariableState variableState)
         {
-            VariableManager.SetValue(string.Format("Euroscope_{0}", variableState.Name), variableState.Value, variableState.Type, this, variableState.Save);
+            VariableManager.SetValue(string.Format("vatsim_{0}", variableState.Name), variableState.Value, variableState.Type, this, variableState.Save);
         }
         public string GetTimeInSeconds()
         {
@@ -128,7 +128,7 @@ namespace airxiti.Euroscope
 
         public override void OpenConfigurator()
         {
-            using (var configuratorForm = new EuroscopeConfiguratorForm())
+            using (var configuratorForm = new VatsimConfiguratorForm())
             {
                 configuratorForm.ShowDialog();
             }
@@ -140,7 +140,7 @@ namespace airxiti.Euroscope
             public override string Description => "Reset Plugin";
             public override void Trigger(string clientId, ActionButton actionButton)
             {
-                MacroDeckLogger.Info(Instance, "Resetting Euroscope Plugin");
+                MacroDeckLogger.Info(Instance, "Resetting Vatsim Plugin");
                 Instance?.Enable();
             }
         }

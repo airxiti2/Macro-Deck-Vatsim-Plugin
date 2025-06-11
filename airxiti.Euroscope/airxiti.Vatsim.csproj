@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0-windows</TargetFramework>
-    <Title>airxiti.Euroscope</Title>
-    <Version>1.0.0</Version>
+    <Title>Macro Deck Vatsim Plugin</Title>
+    <Version>1.1.0</Version>
     <Authors>airxiti</Authors>
 	<UseWindowsForms>true</UseWindowsForms>
   </PropertyGroup>

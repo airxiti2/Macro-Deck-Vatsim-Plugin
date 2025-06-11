@@ -1,11 +1,11 @@
 {
     "type": "Plugin",
-    "name": "Euroscope Plugin",
+    "name": "Vatsim Plugin",
     "author": "airxiti",
-    "repository": "https://github.com/airxiti2/airxiti.macro-deck-utils",
-    "packageId": "airxiti.Euroscope",
-    "version": "1.0.1",
+    "repository": "https://github.com/airxiti2/Macro-Deck-Vatsim-Plugin",
+    "packageId": "airxiti.Vatsim",
+    "version": "1.1.0",
     "target-plugin-api-version": 40,
     "target-macro-deck-version": "2.15.0",
-    "dll": "airxiti.Euroscope.dll"
+    "dll": "airxiti.Vatsim.dll"
 }
