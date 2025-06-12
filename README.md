@@ -22,3 +22,6 @@ Because why not
   - Time left
   - ...
 - ATIS interaction (via vATIS)
+
+
+Disclaimer: I am new to programming, so my code might be bad at some points, but it works so ¯\_(ツ)_/¯
