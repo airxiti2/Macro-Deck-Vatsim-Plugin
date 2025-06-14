@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
+﻿using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace airxiti.Vatsim
 {
     public class Metarfetcher
     {
-        public static async Task<string> fetch_metar(string icao)
+        public static async Task<string> FetchMetar(string icao)
         {
             var client = new HttpClient();
             var url = $"https://metar.vatsim.net/{icao}";

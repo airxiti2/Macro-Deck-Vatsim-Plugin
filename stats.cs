@@ -8,19 +8,19 @@ namespace airxiti.Vatsim
 {
     internal class Stats
     {
-        public string callsign { get; private set; } = "Offline";
-        public TimeSpan elapsed { get; private set; } = TimeSpan.Zero;
+        public string Callsign { get; private set; } = "Offline";
+        public TimeSpan Elapsed { get; private set; } = TimeSpan.Zero;
 
         public async Task GetVatsimStatusAsync()
         {
             try
             {
-                var vatsim_id = Configurator.Instance.VatsimId;
-                MacroDeckLogger.Info(Main.Instance,$"Vatsim-ID: {vatsim_id}");
-                if (string.IsNullOrWhiteSpace(vatsim_id))
+                var vatsimId = Configurator.Instance.VatsimId;
+                MacroDeckLogger.Info(Main.Instance,$"Vatsim-ID: {vatsimId}");
+                if (string.IsNullOrWhiteSpace(vatsimId))
                 {
-                    this.callsign = "No ID";
-                    this.elapsed = TimeSpan.Zero;
+                    this.Callsign = "No ID";
+                    this.Elapsed = TimeSpan.Zero;
                     return;
                 }
 
@@ -39,23 +39,23 @@ namespace airxiti.Vatsim
                 {
                     foreach (var element in root.EnumerateArray())
                     {
-                        if (element.TryGetProperty("id", out var idProp) && idProp.GetInt32().ToString() == vatsim_id)
+                        if (element.TryGetProperty("id", out var idProp) && idProp.GetInt32().ToString() == vatsimId)
                         {
                             if (element.TryGetProperty("callsign", out var callsignProp))
-                                this.callsign = callsignProp.GetString() ?? string.Empty;
+                                this.Callsign = callsignProp.GetString() ?? string.Empty;
                             else
-                                this.callsign = "Empty";
-                            MacroDeckLogger.Info(Main.Instance, $"VATSIM Status: {this.callsign}");
-                            if (element.TryGetProperty("start", out var startProp) && startProp.GetString() is string start && !string.IsNullOrEmpty(start))
+                                this.Callsign = "Empty";
+                            MacroDeckLogger.Info(Main.Instance, $"VATSIM Status: {this.Callsign}");
+                            if (element.TryGetProperty("start", out var startProp) && startProp.GetString() is { } start && !string.IsNullOrEmpty(start))
                             {
                                 if (DateTime.TryParse(start, out var startDateTime))
-                                    this.elapsed = DateTime.UtcNow - startDateTime.ToUniversalTime();
+                                    this.Elapsed = DateTime.UtcNow - startDateTime.ToUniversalTime();
                                 else
-                                    this.elapsed = TimeSpan.Zero;
+                                    this.Elapsed = TimeSpan.Zero;
                             }
                             else
                             {
-                                this.elapsed = TimeSpan.Zero;
+                                this.Elapsed = TimeSpan.Zero;
                             }
                         }
 

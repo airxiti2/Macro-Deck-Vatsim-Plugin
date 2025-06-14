@@ -4,7 +4,7 @@
     "author": "airxiti",
     "repository": "https://github.com/airxiti2/Macro-Deck-Vatsim-Plugin",
     "packageId": "airxiti.Vatsim",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "target-plugin-api-version": 40,
     "target-macro-deck-version": "2.15.0",
     "dll": "airxiti.Vatsim.dll"

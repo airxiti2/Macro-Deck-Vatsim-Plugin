@@ -1,21 +1,27 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0-windows</TargetFramework>
     <Title>Macro Deck Vatsim Plugin</Title>
-    <Version>1.1.0</Version>
+    <Version>1.1.1</Version>
+    <AssemblyVersion>1.1.1</AssemblyVersion>
+    <FileVersion>1.1.1</FileVersion>
+    <InformationalVersion>1.1.1</InformationalVersion>
     <Authors>airxiti</Authors>
 	<UseWindowsForms>true</UseWindowsForms>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
   </PropertyGroup>
-
+  
   <ItemGroup>
-    <PackageReference Include="RestSharp" Version="112.1.0" />
+    <Reference Include="Macro Deck 2">
+      <HintPath>..\..\..\AppData\Local\Programs\Macro Deck\Macro Deck 2.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="Macro Deck 2">
-      <HintPath>..\..\..\..\AppData\Local\Programs\Macro Deck\Macro Deck 2.dll</HintPath>
-    </Reference>
+    <Compile Update="VatsimConfiguratorForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
   </ItemGroup>
 
 </Project>

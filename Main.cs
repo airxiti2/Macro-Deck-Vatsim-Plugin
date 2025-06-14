@@ -1,20 +1,12 @@
 ﻿using System;
 using SuchByte.MacroDeck.Plugins;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Reflection;
 using SuchByte.MacroDeck.Variables;
-using System.Xml.Linq;
 using SuchByte.MacroDeck.Logging;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Threading.Tasks;
 using System.Threading;
-using System.Net.Http;
-using System.Collections;
 using SuchByte.MacroDeck.ActionButton;
-using SuchByte.MacroDeck.GUI.CustomControls;
-using SuchByte.MacroDeck.GUI;
-#pragma warning disable CA1416
+
 
 namespace airxiti.Vatsim
 {
@@ -47,20 +39,20 @@ namespace airxiti.Vatsim
         {
             VariableManager.SetValue(string.Format("vatsim_{0}", variableState.Name), variableState.Value, variableState.Type, this, variableState.Save);
         }
-        public string GetTimeInSeconds()
+        public static string GetTimeInSeconds()
         {
             return DateTime.Now.ToString("HH:mm:ss");
         }
 
         private CancellationTokenSource _cts;
-
+        
         private async Task UpdateLoopAsync(CancellationToken token)
         {
             try
             {
                 string lastMinute = null;
                 await stats.GetVatsimStatusAsync();
-                SetVariable(new VariableState { Name = "station", Value = $"{stats.callsign}", Type = VariableType.String, Save = true });
+                SetVariable(new VariableState { Name = "station", Value = $"{stats.Callsign}", Type = VariableType.String, Save = true });
                 while (!token.IsCancellationRequested)
                 {
                     SetVariable(new VariableState { Name = "time_sec", Value = GetTimeInSeconds(), Type = VariableType.String, Save = false });
@@ -73,9 +65,9 @@ namespace airxiti.Vatsim
                         
                         try
                         {
-                            foreach (var airport in Configurator.Instance.Airports)
+                            foreach (var airport in Configurator.Instance.MetarAirports)
                             {
-                                var metarData = await Metarfetcher.fetch_metar(airport);
+                                var metarData = await Metarfetcher.FetchMetar(airport);
                                 SetVariable(new VariableState { Name = $"metar_{airport.ToLower()}", Value = metarData, Type = VariableType.String, Save = true });
                             }
                         }
@@ -83,7 +75,20 @@ namespace airxiti.Vatsim
                         {
                             MacroDeckLogger.Error(this, $"Error fetching METAR data: {ex.Message}");
                         }
-                        try { SetVariable(new VariableState { Name = "elapsed", Value = $"{stats.elapsed:hh\\:mm}", Type = VariableType.String, Save = true }); }
+                        try
+                        {
+                            foreach (var airport in Configurator.Instance.AtisAirports)
+                            {
+                                var atisData = await VatisFetcher.GetAtis(airport);
+                                SetVariable(new VariableState { Name = $"atis_{airport.ToLower()}_letter", Value = atisData[0], Type = VariableType.String, Save = true });
+                                SetVariable(new VariableState { Name = $"atis_{airport.ToLower()}_text", Value = atisData[1], Type = VariableType.String, Save = true });
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            MacroDeckLogger.Error(this, $"Error fetching ATIS data: {ex.Message}");
+                        }
+                        try { SetVariable(new VariableState { Name = "elapsed", Value = $"{stats.Elapsed:hh\\:mm}", Type = VariableType.String, Save = true }); }
                         catch (Exception ex)
                         {
                             MacroDeckLogger.Error(this, $"Error setting elapsed time variable: {ex.Message}");
@@ -104,7 +109,7 @@ namespace airxiti.Vatsim
 
             this.Actions = new List<PluginAction>
             {
-                new ResetPlugin()
+                new ReloadPlugin()
             };
 
             if (_cts != null)
@@ -128,19 +133,17 @@ namespace airxiti.Vatsim
 
         public override void OpenConfigurator()
         {
-            using (var configuratorForm = new VatsimConfiguratorForm())
-            {
-                configuratorForm.ShowDialog();
-            }
+            using var configuratorForm = new VatsimConfiguratorForm();
+            configuratorForm.ShowDialog();
         }
 
-        public class ResetPlugin : PluginAction
+        public class ReloadPlugin : PluginAction
         {
-            public override string Name => "Reset";
-            public override string Description => "Reset Plugin";
+            public override string Name => "Reload Plugin";
+            public override string Description => "Reloads the Vatsim Plugin";
             public override void Trigger(string clientId, ActionButton actionButton)
             {
-                MacroDeckLogger.Info(Instance, "Resetting Vatsim Plugin");
+                MacroDeckLogger.Info(Instance, "Reloading Vatsim Plugin");
                 Instance?.Enable();
             }
         }
