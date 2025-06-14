@@ -11,6 +11,10 @@ Airports are configurable in the configurator
 If you are online as ATC, you can display your current callsign (`vatsim_station`) and your time online (`vatsim_elapsed`)
 You have to set your Vatsim ID in the configurator
 
+### Current ATIS
+Get current ATIS Letters and Texts from vATIS \\ 
+Important! ATIS Airports have to be in the vATIS profile or it wont work.
+
 ### Current time with seconds
 `vatsim_time_sec`
 Because why not
@@ -21,10 +25,9 @@ Because why not
   - Destination
   - Time left
   - ...
-- ATIS interaction (via vATIS)
 
 ## Installation
 Put the folder `airxiti.Vatsim` in to `%appdata%\Macro Deck\plugins\` (Folder name is important!)
 So it should look like `\Macro Deck\plugins\airxiti.Vatsim\` *DLLs*
 
-Disclaimer: I am new to programming, so my code might be bad at some points, but it works so ¯\_(ツ)_/¯
+Disclaimer: I am new to programming, so my code might be bad at some points, but it works so ¯\\_(ツ)_/¯
