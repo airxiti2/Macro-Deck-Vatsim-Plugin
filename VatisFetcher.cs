@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -36,5 +38,36 @@ namespace airxiti.Vatsim
             var textAtis = root.GetProperty("value").GetProperty("textAtis").GetString();
             return [atisLetter, textAtis];
         }
+
+        public class GetRunways
+        {
+            public static List<string> ExtractRunways(string atisText)
+            {
+                var runways = new List<string>();
+                var patterns = new[]
+                {
+                    @"(?:RUNWAY|RWY)\s+(\d{2}[LCR]?)",
+                    @"(?:LANDING|DEPARTURE|TAKEOFF)\s+(?:RUNWAY|RWY)\s+(\d{2}[LCR]?)",
+                    @"APPROACH\s+(?:RUNWAY|RWY)\s+(\d{2}[LCR]?)",
+                    @"\b(\d{2}[LCR])\b",
+                    @"(?:LDG|TKOF)\s+(\d{2}[LCR]?)"
+                };
+
+                foreach (var pattern in patterns)
+                {
+                    var matches = Regex.Matches(atisText.ToUpper(), pattern);
+                    foreach (Match match in matches)
+                    {
+                        var runway = match.Groups[1].Value;
+                        if (int.TryParse(runway.Substring(0, 2), out int num) && num >= 1 && num <= 36 &&
+                            !runways.Contains(runway))
+                        {
+                            runways.Add(runway);
+                        }
+                    }
+                }
+                return runways;
+            }
+        }
     }
-}
+}    

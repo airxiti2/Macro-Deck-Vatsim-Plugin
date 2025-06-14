@@ -80,8 +80,10 @@ namespace airxiti.Vatsim
                             foreach (var airport in Configurator.Instance.AtisAirports)
                             {
                                 var atisData = await VatisFetcher.GetAtis(airport);
+                                var activeRunways = VatisFetcher.GetRunways.ExtractRunways(atisData[1]);
                                 SetVariable(new VariableState { Name = $"atis_{airport.ToLower()}_letter", Value = atisData[0], Type = VariableType.String, Save = true });
                                 SetVariable(new VariableState { Name = $"atis_{airport.ToLower()}_text", Value = atisData[1], Type = VariableType.String, Save = true });
+                                SetVariable(new VariableState { Name = $"atis_{airport.ToLower()}_runways", Value = string.Join(",", activeRunways), Type = VariableType.String, Save = true });
                             }
                         }
                         catch (Exception ex)
