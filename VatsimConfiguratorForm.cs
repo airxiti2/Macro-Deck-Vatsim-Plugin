@@ -406,12 +406,12 @@ public class VatsimConfiguratorForm : Form
             var airports = Configurator.Instance.AtisAirports.ToList();
             airports.Remove(selectedAirport);
             Configurator.Instance.AtisAirports = airports;
-
-            // Variable entfernen (wenn MacroDeck läuft)
+            
             try
             {
                 SuchByte.MacroDeck.Variables.VariableManager.DeleteVariable($"vatsim_atis_{selectedAirport.ToLower()}_letter");
                 SuchByte.MacroDeck.Variables.VariableManager.DeleteVariable($"vatsim_atis_{selectedAirport.ToLower()}_text");
+                SuchByte.MacroDeck.Variables.VariableManager.DeleteVariable($"vatsim_atis_{selectedAirport.ToLower()}_runways");
             }
             catch (Exception ex)
             {
